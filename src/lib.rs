@@ -31,11 +31,10 @@ pub mod configuration {
 
     use std::io::Write;
 
-    use diesel::backend::Backend;
+    use diesel::backend::{Backend, RawValue};
     use diesel::deserialize::{self, FromSql};
-    use diesel::serialize::{self, Output};
+    use diesel::serialize::{self, Output, ToSql};
     use diesel::sql_types::Integer;
-    use diesel::types::ToSql;
 
     #[derive(Debug, PartialEq, AsExpression)]
     #[sql_type = "Regconfig"]
@@ -65,7 +64,7 @@ pub mod configuration {
         DB: Backend,
         i32: FromSql<Integer, DB>,
     {
-        fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
+        fn from_sql(bytes: RawValue<DB>) -> deserialize::Result<Self> {
             <i32 as FromSql<Integer, DB>>::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
         }
     }
@@ -96,10 +95,10 @@ mod functions {
         #[sql_name = "to_tsquery"]
         fn to_tsquery_with_search_config(config: Regconfig, querytext: Text) -> TsQuery;
     }
-    sql_function!(fn to_tsvector<T: TextOrNullableText>(x: T) -> TsVector);
+    sql_function!(fn to_tsvector<T: TextOrNullableText + SingleValue>(x: T) -> TsVector);
     sql_function! {
         #[sql_name = "to_tsvector"]
-        fn to_tsvector_with_search_config<T: TextOrNullableText>(config: Regconfig, document_content: T) -> TsVector;
+        fn to_tsvector_with_search_config<T: TextOrNullableText + SingleValue>(config: Regconfig, document_content: T) -> TsVector;
     }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
