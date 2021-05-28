@@ -2,19 +2,25 @@
 extern crate diesel;
 
 mod types {
-    use diesel::sql_types::*;
+    use diesel::{backend, deserialize::FromSql, pg::Pg, sql_types::*};
 
     #[allow(deprecated)]
     use diesel::SqlType;
 
-    #[derive(Clone, Copy, SqlType)]
+    #[derive(Debug, Clone, Copy, SqlType)]
     #[postgres(oid = "3615", array_oid = "3645")]
     pub struct TsQuery;
 
-    #[derive(Clone, Copy, SqlType)]
+    #[derive(Debug, Clone, Copy, SqlType, FromSqlRow)]
     #[postgres(oid = "3614", array_oid = "3643")]
     pub struct TsVector;
     pub type Tsvector = TsVector;
+
+    impl FromSql<TsVector, Pg> for TsVector {
+        fn from_sql(bytes: backend::RawValue<Pg>) -> diesel::deserialize::Result<Self> {
+            Ok(TsVector {})
+        }
+    }
 
     pub trait TextOrNullableText {}
 
