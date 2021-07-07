@@ -7,7 +7,7 @@ license = "MIT"
 repository = "https://github.com/fourbs-net/diesel_full_text_search"
 
 [dependencies]
-diesel = { version = "2.0.0", features = ["postgres"] }
+diesel = { version = "2", features = ["postgres"] }
 
 [patch.crates-io]
-diesel = { git = 'https://github.com/diesel-rs/diesel.git', rev = 'c0b6130' }
+diesel = { git = 'https://github.com/diesel-rs/diesel.git' }
